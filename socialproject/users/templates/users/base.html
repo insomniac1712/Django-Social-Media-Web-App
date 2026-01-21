@@ -14,7 +14,7 @@
             <div class="flex justify-between">
                 <!--Website logo-->
                 <div>
-                    <a class="flex" href="">
+                    <a class="flex" href="{% url 'profile' %}">
                         <img class="h-8 w-8 mr-2" src="{% static 'users/images/social.png' %}" alt="">
                         <span class="font-semibold text-lg text-gray-500">Photo App</span>
                     </a>
@@ -33,7 +33,7 @@
                     {% else %}
                     <a class="py-4 px-2 text-gray-500 font-semibold" href="{% url 'login' %}">Login</a>
                     {% endif %}
-                    <a class="py-4 px-2 text-gray-500 font-semibold" href="">Link 3</a>
+                    <a class="py-4 px-2 text-gray-500 font-semibold" href="{% url 'profile' %}">Link 3</a>
                 </div>
             </div>
         </div>

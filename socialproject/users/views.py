@@ -7,7 +7,6 @@ from .models import Profile
 from .forms import UserEditForm, ProfileEditForm
 from posts.models import Post
 
-# Create your views here.
 
 #Login view
 def user_login(request):
@@ -29,12 +28,11 @@ def user_login(request):
 
 #Page after login
 @login_required
-def index(request):
+def profile(request):
     current_user = request.user
-    posts = Post.objects.filter(user = current_user)
-    profile = Profile.objects.filter(user = current_user).first()
-    return render(request, 'users/index.html',{'posts':posts,'profile':profile})
-
+    posts = Post.objects.filter(user=current_user)
+    profile = Profile.objects.filter(user=current_user).first()
+    return render(request, 'users/profile.html', {'posts': posts, 'profile': profile})
 
 #User registeration page
 def register(request):

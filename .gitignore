@@ -28,7 +28,6 @@ secret_key.txt
 # Static and media
 /staticfiles/
 /media/
-/staticfiles/
 /users/static/users/tw-built.css
 *.css.map
 
@@ -52,6 +51,9 @@ Thumbs.db
 coverage/
 htmlcov/
 .tox/
+.coverage
+.pytest_cache/
+.ruff_cache/
 
 # Misc
 *.pem

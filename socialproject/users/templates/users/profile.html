@@ -8,7 +8,7 @@
     <div class="grid  mx-60 p-10 grid-cols-1">
        {% for post in posts %}
       <!--Card starts here-->
-      <a href="#">
+      <a href="{% url 'posts:post_detail' post.slug %}">
        
         <div class="rounded overflow-hidden w-[470px] h-[470px] bg-white shadow-lg">
           <div class="user-container flex mx-5 my-5">
@@ -19,7 +19,7 @@
         </div>
         <div class="px-6 py-4">
           <div class="icon-container flex gap-3">
-            <img class="w-5 h-5" src="{% static 'users/images/Like.png' %}" alt="">
+            <img class="w-5 h-5" src="{% static 'users/images/White Like.png' %}" alt="">
             <img class="w-5 h-5" src="{% static 'users/images/comment.png' %}" alt="">
             <img class="w-5 h-5" src="{% static 'users/images/share.png' %}" alt="">
           </div>

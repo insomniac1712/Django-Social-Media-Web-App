@@ -3,7 +3,7 @@ from .import views
 from django.contrib.auth import views as auth_view
 
 urlpatterns = [
-    path('',views.index, name= 'index'),
+    path('profile/', views.profile, name='profile'),
     path('login/', views.user_login, name='login'),
     path('logout/', auth_view.LogoutView.as_view
          (template_name='users/logout.html'), name='logout'),
@@ -20,5 +20,5 @@ urlpatterns = [
     path('reset/done/',auth_view.PasswordResetConfirmView.as_view(),
          name='users/password_reset_complete'),
     path('register/', views.register, name='register'),
-    path('edit/', views.edit, name='edit')
+    path('edit/', views.edit, name='edit'),
 ]

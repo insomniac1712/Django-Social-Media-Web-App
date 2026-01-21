@@ -1,88 +1,136 @@
-{% extends "users/base.html" %}
-{% load mathfilters %}
-{% load static %}
-{% block body %}
+{% extends "users/base.html" %} {% load static %} {% block body %}
 
-    <div class="flex mt-5 p-10 justify-center">
-      <h2 class="text-3xl font-normal mb-2 text-gray-500">My Posts</h2>
+<div class="mt-10 flex justify-center">
+  <h2 class="text-3xl font-normal text-gray-600">Feed</h2>
+</div>
+
+<div class="grid mx-auto mt-8 w-full max-w-2xl">
+  {% for post in posts %}
+  <div class="rounded overflow-hidden bg-white shadow-lg mb-10">
+    <!-- User info -->
+    <div class="flex items-center px-5 py-4">
+      <img
+        class="h-10 w-10 rounded-full"
+        src="{{ post.user.profile.photo.url }}"
+        alt=""
+      />
+      <span class="ml-3 font-semibold text-gray-700">
+        {{ post.user.username }}
+      </span>
     </div>
-    <div class="grid  mx-60 p-10 grid-cols-1">
-       {% for post in posts %}
-      <!--Card starts here-->
-      <a href="#">
-       
-        <div class="rounded overflow-hidden w-[470px] h-[470px] bg-white shadow-lg">
-        <div class="user-container flex mx-5 my-5">
-          <img class="h-10 w-10 rounded-full" src="{{post.user.profile.photo.url}}" alt="">
-          <div class="mx-2 my-2 font-bold"><span class="text-indigo-500">{{post.user}}</span></div>
-        </div>
-          <img src="{{post.image.url}}" alt="">
-        </div>
-        <div class="px-6 py-4">
-          <div class="icon-container flex gap-3">
-            <a id="{{post.id}}" class="btn-like">
-              {% if logged_user in post.liked_by.all %}
-              <img class="w-5 h-5" src="{% static 'users/images/Red Like.png' %}" alt=""> 
-              {% else %}
-              <img class="w-5 h-5" src="{% static 'users/images/White Like.png' %}" alt="">
-              {% endif %} 
-            </a>
-            
-            <img class="w-5 h-5" src="{% static 'users/images/comment.png' %}" alt="">
-            <img class="w-5 h-5" src="{% static 'users/images/share.png' %}" alt="">
-          </div>
-        </div>
-        <div>
-          {% if post.liked_by.count < 1 %}
-          {% elif post.liked_by.count == 1 %}
-          {{ post.liked_by.first }} Liked this
-          {% elif post.liked_by.count > 1 %}
-          {{ post.liked_by.first }} & {{ post.liked_by.count |sub:1 }} Other liked this
+
+    <!-- Image -->
+    <a href="{% url 'posts:post_detail' post.slug %}"
+      ><img src="{{ post.image.url }}"
+    /></a>
+
+    <!-- Actions -->
+    <div class="px-5 py-3 flex items-center gap-4">
+      <!-- Like -->
+      <form
+        method="post"
+        action="{% url 'posts:toggle_like' post.id %}"
+        class="m-0"
+      >
+        {% csrf_token %}
+        <button type="submit">
+          {% if post.id in liked_post_ids %}
+          <img
+            src="{% static 'users/images/Red Like.png' %}"
+            alt="Unlike"
+            class="w-7 h-7"
+          />
+          {% else %}
+          <img
+            src="{% static 'users/images/White Like.png' %}"
+            alt="Like"
+            class="w-6 h-6"
+          />
           {% endif %}
-        </div>
-        <div class="PX-6 PY-4">
-          <div class="font-bold text-xl mb-2">{{post.title}}</div>
-          <p class="test-gray-700 text-base">{{post.caption}}</p>
-        </div>
-        <div class="px-5 py-5">
-          {% for comment in post.comments.all %}
-              <b>{{ comment.posted_by }}</b>:{{comment.body}}
-              <br>
-          {% endfor %}
-        </div>
-        <div class="px-5 py-5">
-          <form method="post" class="bg-white rounded ">
-            {% csrf_token %}
-            <div class="flex">
-              <div class="border rounded mr-10 text-grey-700">
-                {{ comment_form.body }}
-              </div>
-           
-              <input type="hidden" name="post_id" id="post_id" value="{{ post.id }}">
-              <input type="hidden" name="posted_by" id="posted_by" value="{{ logged_user }}">
-              <button class="bg-green-500 text-white px-5 py-2" type="submit">Add</button>
-           
-            </div>
-            
-          </form>
-        </div>
-      </a>
-      <!--Card ends here-->
+        </button>
+      </form>
+      <!-- Comment -->
+      <button type="button" onclick="toggleCommentBox({{ post.id }})">
+        <img
+          src="{% static 'users/images/comment.png' %}"
+          class="w-6 h-6"
+          alt="Comment"
+        />
+      </button>
+    </div>
+
+    <!-- Like count -->
+    <div class="px-5 text-sm text-gray-600">
+      {% if post.like_count > 0 %} {{ post.like_count }}
+      like{{post.likes.count|pluralize }} {% endif %}
+    </div>
+
+    <!-- Caption -->
+    <div class="px-5 py-4">
+      <h3 class="font-bold text-lg">{{ post.title }}</h3>
+      <p class="text-gray-700">{{ post.caption }}</p>
+    </div>
+
+    <!-- Comments -->
+    <div class="px-5 pb-3 space-y-1">
+      {% for comment in post.comments.all %}
+      <p class="text-sm">
+        <span class="font-semibold"> {{ comment.posted_by.username }} </span> 
+        {{comment.body }}
+      </p>
+      {% empty %}
+      <p class="text-sm text-gray-400">No comments yet</p>
       {% endfor %}
     </div>
 
-    <script type="text/javascript">
+    <!-- Add comment -->
 
-      window.CSRF_TOKEN = "{{csrf_token}}"
-      $(document).on('click','.btn-like', function(){
-        var post_id = this.id
-        $.ajax({
-          method:"POST",
-          url:'/posts/like',
-          data:{post_id:post_id,csrfmiddlewaretoken:window.CSRF_TOKEN}
-        })
-        window.location.href = "http://127.0.0.1:8000/posts/feed"
-      })
-    </script>
-   
-{% endblock body %}   5
+    <div id="comment-box-{{ post.id }}" class="px-5 py-4 border-t hidden">
+      <form
+        method="post"
+        action="{% url 'posts:add_comment' post.id %}"
+        class="flex items-center gap-2"
+      >
+        {% csrf_token %} {{ comment_form_class.body }}
+        <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded">
+          Add
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+  <div class="flex justify-center gap-4 my-8">
+    {% if page_obj.has_previous %}
+    <a
+      href="?page={{ page_obj.previous_page_number }}"
+      class="px-4 py-2 bg-gray-200 rounded"
+    >
+      Previous
+    </a>
+    {% endif %}
+
+    <span class="px-4 py-2 text-gray-600">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a
+      href="?page={{ page_obj.next_page_number }}"
+      class="px-4 py-2 bg-gray-200 rounded"
+    >
+      Next
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function toggleCommentBox(postId) {
+    const box = document.getElementById(`comment-box-${postId}`);
+    if (box) {
+      box.classList.toggle("hidden");
+    }
+  }
+</script>
+
+{% endblock body %}

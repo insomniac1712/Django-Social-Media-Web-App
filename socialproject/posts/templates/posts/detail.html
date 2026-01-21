@@ -1,0 +1,201 @@
+{% extends "users/base.html" %} {% load static %} {% block body %}
+
+<div class="max-w-2xl mx-auto mt-10 bg-white shadow rounded">
+  <div class="flex items-center justify-between py-4">
+    <!--Feeds page-->
+    <div class="px-5 py-4 text-sm">
+      <a
+        href="{% url 'posts:feed' %}"
+        class="flex items-center gap-2 text-white hover:text-gray-500 leading-none bg-blue-500 p-2 rounded"
+      >
+        <img
+          src="{% static 'users/images/arrow_left.png' %}"
+          class="w-5 h-5"
+          alt="Back"
+        />
+        <span>Back to Feed</span>
+      </a>
+    </div>
+
+    <!--Edit and delete-->
+    {% if post.user == user %}
+    <div class="px-5 py-4 flex items-center gap-3 text-sm leading-none">
+      <a
+        href="{% url 'posts:post_edit' post.slug %}"
+        class="flex items-center gap-1 text-white hover:text-gray-500 bg-blue-500 rounded p-2"
+      >
+        <img
+          src="{% static 'users/images/edit.png' %}"
+          alt="edit"
+          class="w-5 h-5"
+        />
+        <span>Edit</span>
+      </a>
+
+      <form
+        method="post"
+        action="{% url 'posts:post_delete' post.slug %}"
+        class="contents m-0"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="flex items-center gap-1 p-0 bg-transparent text-white hover:text-gray-500 bg-red-500 p-2 rounded"
+        >
+          <img
+            src="{% static 'users/images/delete.png' %}"
+            alt="delete"
+            class="w-5 h-5"
+          />
+          <span>Delete</span>
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- User -->
+  <div class="flex items-center px-5 py-4">
+    <img
+      src="{{ post.user.profile.photo.url }}"
+      class="h-10 w-10 rounded-full"
+      alt=""
+    />
+    <span class="ml-3 font-semibold"> {{ post.user.username }} </span>
+  </div>
+
+  <!-- Image -->
+  <img src="{{ post.image.url }}" alt="" />
+
+  <!-- Actions -->
+  <div class="px-5 py-3 flex items-center gap-4">
+    <!-- Like -->
+    <form
+      method="post"
+      action="{% url 'posts:toggle_like' post.id %}"
+      class="m-0"
+    >
+      {% csrf_token %}
+      <button type="submit">
+        {% if post.id in liked_post_ids %}
+        <img src="{% static 'users/images/Red Like.png' %}" class="w-7 h-7" />
+        {% else %}
+        <img src="{% static 'users/images/White Like.png' %}" class="w-6 h-6" />
+        {% endif %}
+      </button>
+    </form>
+
+    <!-- Comment toggle -->
+    <button onclick="toggleCommentBox({{ post.id }})">
+      <img src="{% static 'users/images/comment.png' %}" class="w-6 h-6" />
+    </button>
+  </div>
+
+  <!-- Like count -->
+  {% if post.like_count %}
+  <div class="px-5 text-sm text-gray-600">
+    {{ post.like_count }} like{{ post.like_count|pluralize }}
+  </div>
+  {% endif %}
+
+  <!-- Caption -->
+  <div class="px-5 py-4">
+    <h3 class="font-bold text-lg">{{ post.title }}</h3>
+    <p>{{ post.caption }}</p>
+  </div>
+
+
+  <!--Comment-->
+  <div class="px-5 pb-3 space-y-2">
+  {% for comment in post.comments.all %}
+    <div class="text-sm">
+
+      <!-- DISPLAY MODE -->
+      <div id="comment-view-{{ comment.id }}" class="flex justify-between">
+        <p>
+          <span class="font-semibold">{{ comment.posted_by.username }}</span>
+          {{ comment.body }}
+        </p>
+
+        {% if comment.posted_by == user %}
+          <div class="flex items-center py-0 gap-2 text-xs ">
+            <button
+              onclick="toggleEdit({{ comment.id }})"
+              class="bg-black p-1 rounded"
+            >
+            <img src="{% static 'users/images/edit.png' %}" class='w-4 h-4' alt="">
+
+            </button>
+
+            <form
+              method="post"
+              action="{% url 'posts:comment_delete' comment.id %}"
+              class="contents m-0"
+            >
+              {% csrf_token %}
+              <button class=" bg-red-500 p-1 rounded"><img src="{% static 'users/images/delete.png' %}"  class='w-4 h-4'alt=""></button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- EDIT MODE -->
+      <form
+        id="comment-edit-{{ comment.id }}"
+        method="post"
+        action="{% url 'posts:comment_edit' comment.id %}"
+        class="hidden mt-1"
+      >
+        {% csrf_token %}
+        <input
+          type="text"
+          name="body"
+          value="{{ comment.body }}"
+          class="border rounded px-2 py-1 w-full text-sm"
+        />
+
+        <div class="flex gap-2 mt-1 text-xs">
+          <button class="text-green-600">Save</button>
+          <button
+            type="button"
+            onclick="toggleEdit({{ comment.id }})"
+            class="text-gray-500"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+
+    </div>
+  {% empty %}
+    <p class="text-sm text-gray-400">No comments yet</p>
+  {% endfor %}
+</div>
+
+
+
+  <!-- Add comment -->
+  <div id="comment-box-{{ post.id }}" class="px-5 py-4 border-t hidden">
+    <form
+      method="post"
+      action="{% url 'posts:add_comment' post.id %}"
+      class="flex gap-2"
+    >
+      {% csrf_token %} {{ comment_form_class.body }}
+      <button class="bg-green-500 text-white px-4 rounded">Add</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleCommentBox(id) {
+    document.getElementById(`comment-box-${id}`).classList.toggle("hidden");
+  }
+
+  function toggleEdit(id) {
+    document.getElementById(`comment-view-${id}`).classList.toggle("hidden");
+    document.getElementById(`comment-edit-${id}`).classList.toggle("hidden");
+  }
+</script>
+
+{% endblock %}

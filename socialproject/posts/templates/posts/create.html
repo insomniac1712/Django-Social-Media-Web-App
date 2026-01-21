@@ -1,35 +1,44 @@
 {% extends "users/base.html" %}
+
 {% block body %}
-  <h1>Homepage for users App</h1>  
 
-<h2 class="text-2xl m-10 font-bold">Create Post</h2>
-<div class="container py-5 mx-10">
+<div class="mt-10 mx-auto max-w-2xl">
 
-    <form method="POST" class="bg-white shadow-md m-10 px-8 rounded pt-6 pb-8 mb-4 w-4/5" enctype="multipart/form-data">
+    <h2 class="text-2xl font-bold mb-6">Create Post</h2>
+
+    <form method="POST" action="{% url 'posts:post_create' %}" enctype="multipart/form-data" class="bg-white shadow-md px-8 py-6 rounded">
         {% csrf_token %}
-        <div class="mb-2">
-            <label class="block text-grey-700 text-sm font-bold mb-2" for="">Add Title</label>
-            <div class="shadow appearance-none border rounded py-2 px-3 mr-10 text-grey-700">
-                {{ form.title }}
+
+        {% if form.non_field_errors %}
+            <div class="text-red-500 mb-4">
+                {{ form.non_field_errors }}
             </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Title</label>
+            {{ form.title }}
+            {{ form.title.errors }}
         </div>
 
-        <div class="mb-2">
-            <label class="block text-grey-700 text-sm font-bold mb-2" for="">Upload Image</label>
-            <div class="shadow appearance-none border rounded py-2 px-3 mr-10 text-grey-700">
-                {{ form.image }}
-            </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Image</label>
+            {{ form.image }}
+            {{ form.image.errors }}
         </div>
 
-        <div class="mb-2">
-            <label class="block text-grey-700 text-sm font-bold mb-2" for="">Caption</label>
-            <div class="shadow appearance-none border rounded py-2 px-3 mr-10 text-grey-700">
-                {{ form.caption }}
-            </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-1">Caption</label>
+            {{ form.caption }}
+            {{ form.caption.errors }}
         </div>
-        
-        <button type="submit" class="bg-green-500 text-white my-5 px-5 py-2">Submit</button>
-        
+
+        <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded">
+            Submit
+        </button>
+
     </form>
+
 </div>
+
 {% endblock body %}
