@@ -28,6 +28,7 @@ secret_key.txt
 # Static and media
 /staticfiles/
 /media/
+/socialproject/media/
 /users/static/users/tw-built.css
 *.css.map
 

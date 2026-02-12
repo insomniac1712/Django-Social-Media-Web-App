@@ -1,45 +1,95 @@
 {% load static %}
 <html>
+  <head>
+    <link rel="stylesheet" href="{% static 'users/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'users/style.css' %}" />
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<head>
-    <link rel="stylesheet" href="{% static 'users/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'users/style.css' %}">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-</head>
-
-<body>
+  <body>
     <nav class="shadow-lg">
-        <div class="px-4 mx-auto">
-            <div class="flex justify-between">
-                <!--Website logo-->
-                <div>
-                    <a class="flex" href="{% url 'profile' %}">
-                        <img class="h-8 w-8 mr-2" src="{% static 'users/images/social.png' %}" alt="">
-                        <span class="font-semibold text-lg text-gray-500">Photo App</span>
-                    </a>
-                </div>
-                <!--Website Items-->
-                <div class="space-x-1">
-                    {% if request.user.is_authenticated %}
-                    <form method="POST" action="{% url 'logout' %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit"
-                            class="py-4 px-2 text-gray-500 font-semibold bg-transparent border-none cursor-pointer">
-                            Logout
-                        </button>
-                    </form>
+      <div class="px-4 mx-auto">
+        <div class="flex justify-between">
+          <!--Website logo-->
+          <div class='flex items-center gap-2'>
+            <a class="flex" href="{% url 'users:my_profile' %}">
+              <img
+                class="h-8 w-8 mr-2"
+                src="{% static 'users/images/social.png' %}"
+                alt=""
+              />
+              <span class="font-semibold text-lg text-gray-500 "
+                >Insomniac Social</span
+              >
+            </a>
+          </div>
+          <!--Website Items-->
+          <div class="flex items-center gap-2">
+            {% if request.user.is_authenticated %}
+            <form
+              method="GET"
+              action="{% url 'users:search' %}"
+              class="flex items-center rounded border border-gray-300 bg-white px-2 py-1 mr-2 mt-5"
+            >
+              <button type="submit" class="mr-2 inline-flex items-center justify-center">
+                <img
+                  class="h-4 w-4 object-contain"
+                  src="{% static 'users/images/Search.png' %}"
+                  alt="Search"
+                />
+              </button>
+              <input
+                type="text"
+                name="q"
+                placeholder="Search users..."
+                class="w-40 text-sm text-gray-700 outline-none"
+              />
+            </form>
 
-                    {% else %}
-                    <a class="py-4 px-2 text-gray-500 font-semibold" href="{% url 'login' %}">Login</a>
-                    {% endif %}
-                    <a class="py-4 px-2 text-gray-500 font-semibold" href="{% url 'profile' %}">Link 3</a>
-                </div>
-            </div>
+            <a
+              class="py-4 px-2 text-gray-500 font-semibold"
+              href="{% url 'feed:feed' %}"
+              >Feed</a
+            >
+            <a
+              class="py-4 px-2 text-gray-500 font-semibold"
+              href="{% url 'posts:post_create' %}"
+              >Create Post</a
+            >
+            <a
+              class="py-4 px-2 text-gray-500 font-semibold"
+              href="{% url 'users:my_profile' %}"
+              >My Profile</a
+            >
+            <form
+              method="POST"
+              action="{% url 'users:logout' %}"
+              style="display: inline"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="mt-4 py-4 px-2 text-gray-500 font-semibold bg-transparent border-none cursor-pointer"
+              >
+                Logout
+              </button>
+            </form>
+            {% else %}
+            <a
+              class="py-4 px-2 text-gray-500 font-semibold"
+              href="{% url 'users:login' %}"
+              >Login</a
+            >
+            {% endif %}
+          </div>
         </div>
+      </div>
     </nav>
-    {% block body %}
-    {% endblock body %}
-</body>
-
+    {% block body %} {% endblock body %}
+  </body>
 </html>

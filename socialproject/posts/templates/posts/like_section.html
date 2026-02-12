@@ -1,0 +1,27 @@
+﻿{% load static %}
+
+<div id="like-section-{{ post.id }}" class="leading-none">
+  <form
+    hx-post="{% url 'posts:toggle_like' post.id %}"
+    hx-target="#like-section-{{ post.id }}"
+    hx-swap="outerHTML"
+    hx-disabled-elt="this"
+    class="m-0 inline-flex items-center gap-2 p-0 align-middle leading-none"
+  >
+    {% csrf_token %}
+    <button
+      type="submit"
+      class="m-0 inline-flex h-8 w-8 items-center justify-center rounded-full border-0 bg-transparent p-0 align-middle leading-none hover:bg-gray-100"
+      aria-label="Like post"
+    >
+      {% if is_liked %}
+        <img src="{% static 'users/images/Red Like.png' %}" alt="Unlike" class="block h-5 w-5 object-contain" />
+      {% else %}
+        <img src="{% static 'users/images/White Like.png' %}" alt="Like" class="block h-5 w-5 object-contain" />
+      {% endif %}
+    </button>
+    {% if like_count > 0 %}
+      <span class="text-sm font-medium text-gray-700">{{ like_count }}</span>
+    {% endif %}
+  </form>
+</div>

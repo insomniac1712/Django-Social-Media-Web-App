@@ -26,7 +26,7 @@ def post_create(request):
             new_item = form.save(commit=False)
             new_item.user = request.user
             new_item.save()
-            return redirect('posts:feed')
+            return redirect('feed:feed')
     else:
         form = PostCreateForm()
     return render(request, 'posts/create.html',{'form':form})
@@ -35,18 +35,7 @@ def post_create(request):
 #feeds
 @login_required
 def feed(request):
-    
-    
-    posts = (Post.objects.select_related('user').prefetch_related('comments').annotate(like_count=Count('likes')) )
-    
-    paginator = Paginator(posts, 5) 
-    page_obj = paginator.get_page(request.GET.get('page'))
-    
-    liked_post_ids = set(Like.objects.filter(user=request.user).values_list("post_id", flat=True))
-    
-    comment_form_class = CommentForm
-    return render(request,'posts/feed.html',
-                  {'posts':page_obj, 'comment_form_class':CommentForm, "page_obj": page_obj,"liked_post_ids": liked_post_ids},)
+    return redirect('feed:feed')
 
 
 #add comment
@@ -55,14 +44,24 @@ def feed(request):
 def add_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST)
-    
+    show_comment_actions = request.POST.get("show_comment_actions") == "1"
+
     if form.is_valid():
         comment = form.save(commit=False)
         comment.post = post
         comment.posted_by = request.user
         comment.save()
-        
-    return redirect('posts:feed')
+
+    return render(
+        request,
+        "posts/comment_section.html",
+        {
+            "post": post,
+            "comment_form_class": CommentForm,
+            "show_comment_actions": show_comment_actions,
+        }
+    )
+
 
 
 #delete comment
@@ -70,17 +69,30 @@ def add_comment(request, post_id):
 @require_POST
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
-    
-    if not user_owns_comment(request.user, comment):
-        return HttpResponseForbidden("Only original poster can delete comments.")
-    
+    post = comment.post
+    show_comment_actions = request.POST.get("show_comment_actions") == "1"
+
+    if request.user != comment.posted_by:
+        return HttpResponseForbidden()
+
     comment.delete()
-    return redirect('posts:feed')
+
+    return render(
+        request,
+        "posts/comment_section.html",
+        {
+            "post": post,
+            "comment_form_class": CommentForm,
+            "show_comment_actions": show_comment_actions,
+        }
+    )
 
 #edit comment
 @login_required
 def edit_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
+    post = comment.post
+    show_comment_actions = request.POST.get("show_comment_actions") == "1"
     
     if not user_owns_comment(request.user, comment):
         return HttpResponseForbidden("Only original poster can edit comments.")
@@ -89,24 +101,38 @@ def edit_comment(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-            return redirect('posts:feed')
+        return render(
+            request,
+            "posts/comment_section.html",
+            {
+                "post": post,
+                "comment_form_class": CommentForm,
+                "show_comment_actions": show_comment_actions,
+            }
+        )
     else:
         form = CommentForm(instance=comment)
     return render(request, 'posts/comment_edit.html', {'form': form, 'comment': comment})
 
 @login_required
 @require_POST
-@transaction.atomic
 def toggle_like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    
-    like, created = Like.objects.get_or_create(
-        user=request.user, post=post)
-    
-    if not created:
-        like.delete()
- 
-    return redirect('posts:feed')
+
+    liked = Like.objects.filter(user=request.user, post=post).exists()
+
+    if liked:
+        Like.objects.filter(user=request.user, post=post).delete()
+    else:
+        Like.objects.create(user=request.user, post=post)
+
+    context = {
+        "post": post,
+        "is_liked": not liked,
+        "like_count": Like.objects.filter(post=post).count(),
+    }
+
+    return render(request, "posts/like_section.html", context)
 
 
 @login_required
@@ -141,4 +167,4 @@ def post_delete(request,slug):
         return HttpResponseForbidden("Only original poster can delete posts.")
     
     post.delete()
-    return redirect("posts:feed")
+    return redirect("feed:feed")
