@@ -1,55 +1,37 @@
 {% extends "users/base.html" %} {% load static %} {% block body %}
 
-
-<div class="flex mt-8 justify-center">
-  <h2 class="text-3xl font-semibold mb-2 text-gray-700">My Posts</h2>
+<div class="mt-10 flex justify-center">
+  <h2 class="text-3xl font-semibold text-gray-700">Feed</h2>
 </div>
-<div class="mx-auto mt-6 w-full max-w-2xl px-4">
-  <div class="mb-8 rounded-xl bg-white px-5 py-4 shadow-md">
-    <div class="flex items-center gap-3">
-      {% if profile and profile.photo %}
-      <img
-        class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-200"
-        src="{{ profile.photo.url }}"
-        alt="{{ profile_user.username }}"
-      />
-      {% else %}
-      <div class="h-10 w-10 rounded-full bg-gray-300 ring-1 ring-gray-200"></div>
-      {% endif %}
-      <h2 class="text-lg font-semibold text-gray-900">{{ profile_user.username }}</h2>
-    </div>
-    {% include "follow/follow_section.html" %}
-  </div>
 
+<div class="grid mx-auto mt-8 w-full max-w-2xl">
   {% for post in posts %}
-  <!--Card starts here-->
-
   <div class="mb-10 overflow-hidden rounded-xl bg-white shadow-md">
-    <div class="user-container flex mx-5 my-5">
-      {% if profile and profile.photo %}
+    <!-- User info -->
+    <a href="{% url 'users:profile' post.user.username %}" class="flex items-center px-5 py-4 hover:bg-gray-50">
+      {% if post.user.profile.photo %}
       <img
         class="h-10 w-10 rounded-full object-cover ring-1 ring-gray-200"
-        src="{{ profile.photo.url }}"
-        alt="{{ post.user.username }}"
+        src="{{ post.user.profile.photo.url }}"
       />
-      {% else %}
-      <div class="h-10 w-10 rounded-full bg-gray-300 ring-1 ring-gray-200"></div>
       {% endif %}
-      <div class="mx-2 my-2 font-bold">
-        <span class="text-indigo-500">{{ post.user }}</span>
-      </div>
-    </div>
+      <span class="ml-3 text-sm font-semibold text-gray-800">{{ post.user.username }}</span>
+    </a>
 
     <a href="{% url 'posts:post_detail' post.slug %}" class="block">
+      <!-- Post image -->
       {% if post.image %}
-      <img class="w-full max-h-[520px] object-cover" src="{{ post.image.url }}" alt="{{ post.title }}" />
+      <img class="w-full max-h-[520px] object-cover" src="{{ post.image.url }}" />
       {% endif %}
+
+      <!-- Caption -->
       <div class="px-5 py-4">
         <h3 class="font-bold text-gray-900">{{ post.title }}</h3>
         <p class="mt-1 text-sm text-gray-700">{{ post.caption }}</p>
       </div>
     </a>
-
+  
+    <!-- ACTIONS -->
     <div class="flex items-center justify-between border-t border-gray-100 px-2 py-3 leading-none">
       <div class="flex items-center gap-3">
         {% include "posts/like_section.html" %}
@@ -66,13 +48,39 @@
           />
         </button>
       </div>
+
       <span class="text-xs text-gray-500 px-3">{{ post.created_at|date:"M d, Y" }}</span>
     </div>
 
     {% include "posts/comment_section.html" with post=post %}
   </div>
-  <!--Card ends here-->
   {% endfor %}
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="mb-10 flex items-center justify-center gap-3">
+    {% if page_obj.has_previous %}
+    <a
+      href="?page={{ page_obj.previous_page_number }}"
+      class="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+    >
+      Previous
+    </a>
+    {% endif %}
+
+    <span class="text-sm text-gray-600">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a
+      href="?page={{ page_obj.next_page_number }}"
+      class="rounded border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+    >
+      Next
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 
 <script>
@@ -81,4 +89,4 @@
   }
 </script>
 
-{% endblock body %}
+{% endblock %}

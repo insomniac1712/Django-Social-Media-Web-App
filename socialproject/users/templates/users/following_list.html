@@ -1,0 +1,20 @@
+{% extends "users/base.html" %}
+{% block body %}
+
+<h2 class="text-xl font-semibold p-6">
+    {{ profile_user.username }} is following
+</h2>
+
+<ul class="p-6 space-y-2">
+    {% for user in following %}
+        <li>
+            <a href="{% url 'users:profile' user.username %}">
+                {{ user.username }}
+            </a>
+        </li>
+    {% empty %}
+        <li>Not following anyone yet</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

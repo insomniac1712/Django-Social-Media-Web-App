@@ -1,6 +1,16 @@
 {% extends "users/base.html" %}
 {% block body %}
-  <h1>Registeration successful!</h1>  
-
+<h1 class="text-2xl m-10">Account Created</h1>
+<div class="container py-5">
+  <div class="bg-white shadow-md m-10 w-2/5 rounded px-8 pt-6 pb-8 mb-4">
+    <p class="text-gray-700 mb-6">
+      Registration successful. Choose what you want to do next.
+    </p>
+    <div class="flex gap-3">
+      <a class="text-white bg-green-500 px-5 py-2 rounded" href="{% url 'users:login' %}">Login</a>
+      <a class="text-green-600 border border-green-500 px-5 py-2 rounded" href="{% url 'users:edit' %}">Complete your profile</a>
+    </div>
+  </div>
+</div>
 
 {% endblock body %}

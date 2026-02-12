@@ -1,0 +1,27 @@
+<div id="follow-section" class="mt-3 flex items-center justify-between gap-4">
+  <div class="flex items-center gap-4 text-sm text-gray-600">
+    <a href="{% url 'users:following' profile_user.username %}" class="hover:text-gray-900">
+      Following: <span class="font-semibold text-gray-800">{{ following_count }}</span>
+    </a>
+    <a href="{% url 'users:followers' profile_user.username %}" class="hover:text-gray-900">
+      Followers: <span class="font-semibold text-gray-800">{{ followers_count }}</span>
+    </a>
+  </div>
+
+  {% if request.user != profile_user %}
+  <form
+    hx-post="{% url 'follow:toggle' profile_user.username %}"
+    hx-target="#follow-section"
+    hx-swap="outerHTML"
+    hx-disabled-elt="this"
+  >
+    {% csrf_token %}
+    <button
+      type="submit"
+      class="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
+    >
+      {% if is_following %}Unfollow{% else %}Follow{% endif %}
+    </button>
+  </form>
+  {% endif %}
+</div>
