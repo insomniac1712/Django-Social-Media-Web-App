@@ -124,7 +124,7 @@ def toggle_like(request, post_id):
     if liked:
         Like.objects.filter(user=request.user, post=post).delete()
     else:
-        Like.objects.create(user=request.user, post=post)
+        Like.objects.get_or_create(user=request.user, post=post)
 
     context = {
         "post": post,

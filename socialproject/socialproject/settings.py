@@ -35,6 +35,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'notifications',
+    'api',
     'rest_framework_simplejwt',
     'rest_framework',
     'feed',
